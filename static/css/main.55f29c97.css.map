@@ -1,0 +1,1 @@
+{"version":3,"sources":["index.css"],"names":[],"mappings":"AAAA,KAAO,QAAU,CAEjB,YADS,WAAa,WAAY,CAKjC,KAHC,cAAgB","file":"static/css/main.55f29c97.css","sourcesContent":["body { margin: 0; }\ncanvas { width: 100%; height: 100% }\n#app {\n  position: fixed;\n  width: 100%;\n  height: 100%;\n}\n\n\n\n// WEBPACK FOOTER //\n// ./src/index.css"],"sourceRoot":""}
