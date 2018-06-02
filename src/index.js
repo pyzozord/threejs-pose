@@ -3,21 +3,39 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import * as Three from 'three'
 import {Container3D, Object3D} from './react3d'
+const camera = new Three.PerspectiveCamera(75, window.innerWidth / window.innerHeigh, 1, 100)
+const icon = new Three.Object3D()
+const hello = new Three.Object3D()
+const text = new Three.Object3D()
+
+// <Object3D object={text}>
+//   <div>Hello</div>
+// </Object3D>
 
 class App extends React.Component {
   render() {
-    const object = new Three.Object3D()
-    object.position.z=200
-    object.rotateX(Three.Math.degToRad(45))
     return (
-      <Container3D>
-        <Object3D object={object}>
-          asdasd
+      <Container3D camera={camera}>
+        <Object3D object={icon}>
+            <div style={{fontSize: '30px'}}>🌎👋Hello world</div>
+            <img
+              style={{width: '450px'}}
+              src="https://media2.giphy.com/media/1USKMDPjuH4ovL7J5h/giphy.gif"
+            />
         </Object3D>
       </Container3D>
     )
   }
 }
+
+// text.position.z = 260
+// text.position.z -= 0.1
+// icon.position.z = -500
+// icon.rotation.y += 9.05
+setInterval(()=>{
+  icon.rotation.y -= 0.01
+  ReactDOM.render(<App />, document.getElementById('root'));
+}, 16)
 
 // class App extends React.Component {
 //   componentDidMount() {
@@ -45,4 +63,4 @@ class App extends React.Component {
 //   }
 // }
 
-ReactDOM.render(<App />, document.getElementById('root'));
+// ReactDOM.render(<App />, document.getElementById('root'));
