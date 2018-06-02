@@ -1,0 +1,1 @@
+{"version":3,"sources":["index.css"],"names":[],"mappings":"AAAA,KACE,QAAU,CAEZ,SACE,WACA,YACA,cAAgB","file":"static/css/main.08531e30.css","sourcesContent":["body {\n  margin: 0;\n}\n.Scene3D {\n  width: 100%;\n  height: 100%;\n  position: fixed;\n}\n\n\n\n// WEBPACK FOOTER //\n// ./src/index.css"],"sourceRoot":""}
