@@ -2,15 +2,15 @@ import './index.css'
 import React from 'react'
 import ReactDOM from 'react-dom'
 import * as Three from 'three'
+import FPC from './FirstPersonControls.js'
 import {Container3D, Object3D} from './react3d'
-const camera = new Three.PerspectiveCamera(75, window.innerWidth / window.innerHeigh, 1, 100)
+
+const camera = new Three.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000)
+const controls = new FPC(camera)
+controls.movementSpeed *= 10
 const icon = new Three.Object3D()
 const hello = new Three.Object3D()
 const text = new Three.Object3D()
-
-// <Object3D object={text}>
-//   <div>Hello</div>
-// </Object3D>
 
 class App extends React.Component {
   render() {
@@ -28,39 +28,9 @@ class App extends React.Component {
   }
 }
 
-// text.position.z = 260
-// text.position.z -= 0.1
-// icon.position.z = -500
-// icon.rotation.y += 9.05
+// icon.position.z -= 1000
 setInterval(()=>{
-  icon.rotation.y -= 0.01
+  // icon.rotation.y -= 0.01
+  controls.update(1)
   ReactDOM.render(<App />, document.getElementById('root'));
 }, 16)
-
-// class App extends React.Component {
-//   componentDidMount() {
-//     const thisDOMNode = ReactDOM.findDOMNode(this)
-//     const width = thisDOMNode.clientWidth
-//     const height = thisDOMNode.clientHeight
-
-//     this.scene = new Three.Scene()
-//     this.renderer = new CSS3DRenderer()
-//     this.camera = new Three.PerspectiveCamera(75, width / height, 0.1, 1000)
-//     this.renderer.setSize(width, height);
-//     thisDOMNode.appendChild(this.renderer.domElement)
-
-//     const spriteDOMNode = document.createElement('div')
-//     ReactDOM.render('hello', spriteDOMNode)
-//     const sprite = new CSS3DObject(spriteDOMNode)
-//     sprite.rotateX(Three.Math.degToRad(30))
-//     this.scene.add(sprite)
-
-//     this.camera.position.z = 20
-//     this.renderer.render(this.scene, this.camera)
-//   }
-//   render() {
-//     return <div id="app" />
-//   }
-// }
-
-// ReactDOM.render(<App />, document.getElementById('root'));

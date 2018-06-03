@@ -13,8 +13,13 @@ export class Container3D extends React.Component {
     }
   }
   getMatrix() {
-    const { elements } = this.state.camera.matrixWorld
-    return elements
+    const { elements } = this.state.camera.matrixWorldInverse
+    return [
+      elements[0], - elements[1], elements[2], elements[3],
+      elements[4], - elements[5], elements[6], elements[7],
+      elements[8], - elements[9], elements[10], elements[11],
+      elements[12], - elements[13], elements[14], elements[15],
+    ]
   }
   getStyleScene() {
     const { camera, width, height } = this.state
@@ -27,13 +32,15 @@ export class Container3D extends React.Component {
     const { camera, width, height } = this.state
     const fov = `${camera.projectionMatrix.elements[5] * height/2}px`
     return {
-      // width: width,
-      // height: height,
+      width: width,
+      height: height,
       // position: 'aboslute',
+        // translate3d(${width/2}px, ${height/2}px, ${fov})
       transformStyle: 'preserve-3d',
       transform: `
-        translate3d(${width/2}px, ${height/2}px, ${fov})
+        translateZ(${fov})
         matrix3d(${this.getMatrix().join(',')})
+        translate(${width/2}px, ${height/2}px)
       `
     }
   }
@@ -73,15 +80,21 @@ class Object3DInternal extends React.Component {
   }
   getMatrix() {
     const { elements } = this.state.object.matrixWorld
-    return elements
+    return [
+      elements[0], elements[1], elements[2], elements[3],
+      - elements[4], - elements[5], - elements[6], - elements[7],
+      elements[8], elements[9], elements[10], elements[11],
+      elements[12], elements[13], elements[14], elements[15],
+    ]
+
   }
   getStyle() {
-    const fov = `-${this.props.camera.projectionMatrix.elements[5] * this.props.height/2}px`
+    // const fov = `-${this.props.camera.projectionMatrix.elements[5] * this.props.height/2}px`
     return {
       // display: 'inline-block',
       position: 'absolute',
       transform: `
-        translate3d(-50%, -50%, ${fov})
+        translate(-50%, -50%)
         matrix3d(${this.getMatrix().join(',')})
       `,
     }
