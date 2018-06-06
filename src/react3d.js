@@ -2,9 +2,17 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import * as Three from 'three'
 
-const {Provider, Consumer} = React.createContext('scene3d')
+const {
+  Provider: Scene3DProvider,
+  Consumer: Scene3DConsumer
+} = React.createContext('scene3d')
 
-export class Container3D extends React.Component {
+const {
+  Provider: Object3DProvider,
+  Consumer: Object3DConsumer
+} = React.createContext('object3d')
+
+export class Scene3D extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
@@ -15,10 +23,10 @@ export class Container3D extends React.Component {
   getMatrix() {
     const { elements } = this.state.camera.matrixWorldInverse
     return [
-      elements[0], - elements[1], elements[2], elements[3],
-      elements[4], - elements[5], elements[6], elements[7],
-      elements[8], - elements[9], elements[10], elements[11],
-      elements[12], - elements[13], elements[14], elements[15],
+      elements[0], -elements[1], elements[2], elements[3],
+      elements[4], -elements[5], elements[6], elements[7],
+      elements[8], -elements[9], elements[10], elements[11],
+      elements[12], -elements[13], elements[14], elements[15],
     ]
   }
   getStyleScene() {
@@ -32,15 +40,14 @@ export class Container3D extends React.Component {
     const { camera, width, height } = this.state
     const fov = `${camera.projectionMatrix.elements[5] * height/2}px`
     return {
+      // border: '1px solid red',
       width: width,
       height: height,
-      // position: 'aboslute',
-        // translate3d(${width/2}px, ${height/2}px, ${fov})
+      position: 'aboslute',
       transformStyle: 'preserve-3d',
       transform: `
         translateZ(${fov})
         matrix3d(${this.getMatrix().join(',')})
-        translate(${width/2}px, ${height/2}px)
       `
     }
   }
@@ -49,7 +56,7 @@ export class Container3D extends React.Component {
     const width = thisDOMNode.clientWidth
     const height = thisDOMNode.clientHeight
     const camera = this.state.camera
-      || new Three.PerspectiveCamera(75, width / height, 1, 100)
+      || new Three.PerspectiveCamera(45, width / height, 1, 100)
     this.setState({ camera, height, width })
   }
   render() {
@@ -62,16 +69,16 @@ export class Container3D extends React.Component {
     return (
       <div className="Scene3D" style={this.getStyleScene()}>
         <div className="Camera3D" style={this.getStyleCamera()}>
-          <Provider value={{ scene, camera, width, height }}>
+          <Scene3DProvider value={{ scene, camera, width, height }}>
             {this.props.children}
-          </Provider>
+          </Scene3DProvider>
         </div>
       </div>
     )
   }
 }
 
-class Object3DInternal extends React.Component {
+class Object3DImplementation extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
@@ -80,6 +87,9 @@ class Object3DInternal extends React.Component {
   }
   getMatrix() {
     const { elements } = this.state.object.matrixWorld
+    if (this.props.parentObject) {
+      return elements
+    }
     return [
       elements[0], elements[1], elements[2], elements[3],
       - elements[4], - elements[5], - elements[6], - elements[7],
@@ -89,27 +99,48 @@ class Object3DInternal extends React.Component {
 
   }
   getStyle() {
-    // const fov = `-${this.props.camera.projectionMatrix.elements[5] * this.props.height/2}px`
-    return {
-      // display: 'inline-block',
+    const { camera, width, height } = this.props
+    const fov = `${camera.projectionMatrix.elements[5] * height/2}px`
+    let styles = {
+      // border: '1px solid green',
       position: 'absolute',
+      transformStyle: 'preserve-3d',
       transform: `
-        translate(-50%, -50%)
         matrix3d(${this.getMatrix().join(',')})
       `,
     }
+    // if (!this.props.parentObject) {
+      styles = Object.assign(styles, {
+        top: '50%',
+        left: '50%',
+        transform: `
+          translate(-50%, -50%)
+        ` + styles.transform
+      })
+    // }
+    return styles
   }
   componentDidMount() {
-    this.props.scene.add(this.state.object)
+    if (this.props.parentObject) {
+      this.props.parentObject.add(this.state.object)
+    } else {
+      this.props.scene.add(this.state.object)
+    }
   }
   componentWillUnmount() {
-    this.props.scene.remove(this.state.object)
+    if (this.props.parentObject) {
+      this.props.parentObject.remove(this.state.object)
+    } else {
+      this.props.scene.remove(this.state.object)
+    }
   }
   render() {
     this.state.object.updateMatrixWorld()
     return (
       <div className="Object3D" style={this.getStyle()}>
-        {this.props.children}
+        <Object3DProvider value={{ parentObject: this.state.object }}>
+          {this.props.children}
+        </Object3DProvider>
       </div>
     )
   }
@@ -117,14 +148,16 @@ class Object3DInternal extends React.Component {
 
 export function Object3D({children, ...props}) {
   return (
-    <Consumer>
-      {consumerProps => (
-        <Object3DInternal {...props} {...consumerProps}>
-          {children}
-        </Object3DInternal>
+    <Scene3DConsumer>
+      {sceneProps => (
+        <Object3DConsumer>
+          {objectProps => (
+            <Object3DImplementation {...props} {...sceneProps} {...objectProps}>
+              {children}
+            </Object3DImplementation>
+          )}
+        </Object3DConsumer>
       )}
-    </Consumer>
+    </Scene3DConsumer>
   )
 }
-
-
