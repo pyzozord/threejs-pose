@@ -13,6 +13,30 @@ const {
 } = React.createContext('object3d')
 
 export class Scene3D extends React.Component {
+  static getDerivedStateFromProps({
+    scene3d,
+    object3d,
+    camera,
+    scene,
+    children,
+    fov,
+    near,
+    far,
+    ...props
+  }, state
+  ){
+    if (state.camera) {
+      Object.entries(props).forEach(([name, value]) => {
+        Object.assign(state.camera[name], value)
+      })
+    }
+    return state
+  }
+  static defaultProps = {
+    fov: 45,
+    near: 1,
+    far: 100,
+  }
   constructor(props) {
     super(props)
     this.state = {
@@ -55,8 +79,10 @@ export class Scene3D extends React.Component {
     const thisDOMNode = ReactDOM.findDOMNode(this)
     const width = thisDOMNode.clientWidth
     const height = thisDOMNode.clientHeight
+    const { fov, near, far } = this.props
     const camera = this.state.camera
-      || new Three.PerspectiveCamera(45, width / height, 1, 100)
+      // || new Three.PerspectiveCamera(45, width / height, 1, 100)
+      || new Three.PerspectiveCamera(fov, width / height, near, far)
     this.setState({ camera, height, width })
   }
   render() {
@@ -79,15 +105,30 @@ export class Scene3D extends React.Component {
 }
 
 class Object3DImplementation extends React.Component {
+  static getDerivedStateFromProps({
+    scene3d,
+    object3d,
+    object,
+    children,
+    ...props
+  }, state
+  ){
+    Object.entries(props).forEach(([name, value]) => {
+      Object.assign(state.object[name], value)
+    })
+    return state
+  }
   constructor(props) {
     super(props)
     this.state = {
-      object: this.props.object || new Three.Object3D(),
+      object: props.object instanceof Three.Object3D
+        ? props.object
+        : new Three.Object3D(),
     }
   }
   getMatrix() {
     const { elements } = this.state.object.matrixWorld
-    if (this.props.parentObject) {
+    if (this.props.object3d.parent) {
       return elements
     }
     return [
@@ -99,7 +140,7 @@ class Object3DImplementation extends React.Component {
 
   }
   getStyle() {
-    const { camera, width, height } = this.props
+    const { camera, width, height } = this.props.scene3d
     const fov = `${camera.projectionMatrix.elements[5] * height/2}px`
     let styles = {
       // border: '1px solid green',
@@ -109,7 +150,7 @@ class Object3DImplementation extends React.Component {
         matrix3d(${this.getMatrix().join(',')})
       `,
     }
-    // if (!this.props.parentObject) {
+    // if (!this.props.object3d.parent) {
       styles = Object.assign(styles, {
         top: '50%',
         left: '50%',
@@ -121,24 +162,16 @@ class Object3DImplementation extends React.Component {
     return styles
   }
   componentDidMount() {
-    if (this.props.parentObject) {
-      this.props.parentObject.add(this.state.object)
-    } else {
-      this.props.scene.add(this.state.object)
-    }
+    this.props.scene3d.scene.add(this.state.object)
   }
   componentWillUnmount() {
-    if (this.props.parentObject) {
-      this.props.parentObject.remove(this.state.object)
-    } else {
-      this.props.scene.remove(this.state.object)
-    }
+    this.props.scene3d.scene.remove(this.state.object)
   }
   render() {
     this.state.object.updateMatrixWorld()
     return (
       <div className="Object3D" style={this.getStyle()}>
-        <Object3DProvider value={{ parentObject: this.state.object }}>
+        <Object3DProvider value={{ parent: this.state.object }}>
           {this.props.children}
         </Object3DProvider>
       </div>
@@ -152,7 +185,7 @@ export function Object3D({children, ...props}) {
       {sceneProps => (
         <Object3DConsumer>
           {objectProps => (
-            <Object3DImplementation {...props} {...sceneProps} {...objectProps}>
+            <Object3DImplementation {...props} scene3d={{...sceneProps}} object3d={{...objectProps}}>
               {children}
             </Object3DImplementation>
           )}

@@ -5,19 +5,11 @@ import * as Three from 'three'
 import FPC from './FirstPersonControls.js'
 import {Scene3D, Object3D} from './react3d'
 
-const camera = new Three.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000)
-// const controls = new FPC(camera)
-// controls.movementSpeed *= 10
-const icon = new Three.Object3D()
-const icon2 = new Three.Object3D()
-const icon2container = new Three.Object3D()
-
-camera.position.z = 800
-icon2.position.z = 300
+let frames = 0
 
 function Rick({children}) {
   return (
-    <Object3D object={icon}>
+    <Object3D position={{ z: -100 }} rotation={{ y: -frames/600 }}>
       <div style={{fontSize: '30px'}}>🐓 Michal's screen save 🐓</div>
       <img
         style={{width: '450px'}}
@@ -31,10 +23,10 @@ function Rick({children}) {
 
 function Morty() {
   return (
-    <Object3D object={icon2container}>
-      <Object3D object={icon2}>
-        <div 
-          style={{ 
+    <Object3D rotation={{ y: frames/200 }}>
+      <Object3D position={{ z: 300 }}>
+        <div
+          style={{
             display: 'block',
             width: '200px',
             height: '200px',
@@ -48,10 +40,11 @@ function Morty() {
   )
 }
 
+
 class App extends React.Component {
   render() {
     return (
-      <Scene3D camera={camera}>
+      <Scene3D fov={75} position={{ z: 400 }} >
         <Morty />
         <Rick />
       </Scene3D>
@@ -60,10 +53,7 @@ class App extends React.Component {
 }
 
 setInterval(()=>{
-  icon.rotation.y -= 0.002
-  icon2container.rotateOnAxis(new Three.Vector3(1, 1, 0), 0.01)
-  // icon2container.rotation.y += 0.005
-  // icon2.rotation.y += 0.05
+  frames++
   // controls.update(1)
   ReactDOM.render(<App />, document.getElementById('root'));
 }, 1000/60)
