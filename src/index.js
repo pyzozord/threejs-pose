@@ -43,6 +43,7 @@ function Morty() {
 
 class App extends React.Component {
   render() {
+    console.log('asdasdasd');
     return (
       <Scene3D fov={75} position={{ z: 400 }} >
         <Morty />
