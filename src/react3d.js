@@ -81,7 +81,6 @@ export class Scene3D extends React.Component {
     const height = thisDOMNode.clientHeight
     const { fov, near, far } = this.props
     const camera = this.state.camera
-      // || new Three.PerspectiveCamera(45, width / height, 1, 100)
       || new Three.PerspectiveCamera(fov, width / height, near, far)
     this.setState({ camera, height, width })
   }
@@ -143,22 +142,19 @@ class Object3DImplementation extends React.Component {
     const { camera, width, height } = this.props.scene3d
     const fov = `${camera.projectionMatrix.elements[5] * height/2}px`
     let styles = {
-      // border: '1px solid green',
       position: 'absolute',
       transformStyle: 'preserve-3d',
       transform: `
         matrix3d(${this.getMatrix().join(',')})
       `,
     }
-    // if (!this.props.object3d.parent) {
-      styles = Object.assign(styles, {
-        top: '50%',
-        left: '50%',
-        transform: `
-          translate(-50%, -50%)
-        ` + styles.transform
-      })
-    // }
+    styles = Object.assign(styles, {
+      top: '50%',
+      left: '50%',
+      transform: `
+        translate(-50%, -50%)
+      ` + styles.transform
+    })
     return styles
   }
   componentDidMount() {
